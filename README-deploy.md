@@ -41,11 +41,25 @@ Create 4 networks (VLAN or flat pools) and note their names:
 2. Attach vNIC to **net-vuln**.
 3. Install Ubuntu (server, minimal), set static IP:
    - IP `192.168.20.10/24`, GW `192.168.20.1`, DNS optional
-4. SSH in and run:
+4. SSH in and get the script from the public GitHub repo (no file upload needed):
+
+Option A — git clone:
 
 ```bash
+sudo apt-get update && sudo apt-get install -y git
+git clone https://github.com/sudichai/sangfor-ngfw-waf-poc-lab.git
+cd sangfor-ngfw-waf-poc-lab
 sudo bash deploy-vulnserver.sh
 ```
+
+Option B — curl the script directly (no git install):
+
+```bash
+curl -O https://raw.githubusercontent.com/sudichai/sangfor-ngfw-waf-poc-lab/master/deploy-vulnserver.sh
+sudo bash deploy-vulnserver.sh
+```
+
+Note: the VM needs internet access (through HCI NAT/proxy) to reach GitHub and to pull the Docker image.
 
 5. Verify: `curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1/login.php` → `200`
 

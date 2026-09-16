@@ -9,7 +9,7 @@ Follow these steps in order. Reference IPs from the design doc (`Sangfor-NGFW-WA
 | Sangfor HCI cluster | Running, with network pools for the 4 zones |
 | Ubuntu 24.04 LTS ISO | For vuln server + client VM |
 | Kali Linux ISO or OVA | Latest Rolling release |
-| Sangfor NGFW OVA | vNGAF image for HCI |
+| Sangfor NGFW OVA | vNSF image for HCI |
 | Tools | curl (host), SSH client, browser for NGFW GUI |
 
 ## 2. Network Zones on HCI

@@ -86,5 +86,45 @@ else
 fi
 kill "${LISTENER_PID}" 2>/dev/null
 
+phase "Phase 5 — OWASP Juice Shop (port 3000)"
+run_cmd "juice-sqli" curl -s \
+  "${BASE}:3000/rest/products/search?q='))%20UNION%20SELECT%201,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54--"
+run_cmd "juice-xss" curl -s \
+  "${BASE}:3000/rest/products/search?q=<script>alert(1)</script>"
+run_cmd "juice-default-creds" curl -s -X POST "${BASE}:3000/rest/user/login" \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@juice-sh.op","password":"admin123"}'
+
+phase "Phase 6 — bWAPP (port 8080)"
+BWAPP_JAR="${RUN_DIR}/bwapp_cookies.txt"
+curl -s -c "${BWAPP_JAR}" -b "${BWAPP_JAR}" "${BASE}:8080/login.php" > /dev/null
+curl -s -c "${BWAPP_JAR}" -b "${BWAPP_JAR}" \
+  -d "login=login&form=login&username=bee&password=bug" "${BASE}:8080/login.php" > /dev/null
+run_cmd "bwapp-cmdi" curl -s -b "${BWAPP_JAR}" \
+  "${BASE}:8080/commandi.php?ip=127.0.0.1%3B+whoami&form=submit"
+run_cmd "bwapp-xxe" curl -s -b "${BWAPP_JAR}" -X POST \
+  -d '<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE root [<!ENTITY xxe SYSTEM "file:///etc/passwd">]><root><name>&xxe;</name></root>' \
+  "${BASE}:8080/xxe-1.php"
+run_cmd "bwapp-sqli" curl -s -b "${BWAPP_JAR}" \
+  "${BASE}:8080/sqli-1.php?title=1%27+OR+1%3D1--&action=search"
+run_cmd "bwapp-xss" curl -s -b "${BWAPP_JAR}" \
+  "${BASE}:8080/xss-get-1.php?firstname=<script>alert(1)</script>&lastname=x&form=submit"
+
+phase "Phase 7 — Mutillidae (port 8081)"
+MUT_JAR="${RUN_DIR}/mutillidae_cookies.txt"
+curl -s -c "${MUT_JAR}" -b "${MUT_JAR}" "${BASE}:8081/login.php" > /dev/null
+curl -s -c "${MUT_JAR}" -b "${MUT_JAR}" \
+  -d "username=admin%40example.com&password=admin&login-php-submit-button=Login" \
+  "${BASE}:8081/login.php" > /dev/null
+run_cmd "mut-sqli" curl -s -b "${MUT_JAR}" \
+  "${BASE}:8081/index.php?page=user-info.php&username=1%27+OR+1%3D1--&password=x&user-info-php-submit-button=View+Account+Details"
+run_cmd "mut-cmdi" curl -s -b "${MUT_JAR}" \
+  "${BASE}:8081/index.php?page=dns-lookup.php&target_host=127.0.0.1%3B+whoami&dns-lookup-php-submit-button=Lookup+DNS"
+run_cmd "mut-xss" curl -s -b "${MUT_JAR}" \
+  "${BASE}:8081/index.php?page=dns-lookup.php&target_host=<script>alert(1)</script>&dns-lookup-php-submit-button=Lookup+DNS"
+
+phase "Phase 8 — Sanity reminder"
+echo "Legit browsing check is done manually from the LAN client VM (design doc Phase 8)" | tee -a "${SUMMARY}"
+
 phase "DONE — evidence in ${RUN_DIR}"
 echo "Review: cat ${SUMMARY}" | tee -a "${SUMMARY}"

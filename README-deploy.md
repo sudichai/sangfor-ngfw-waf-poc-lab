@@ -23,7 +23,7 @@ Create 4 networks (VLAN or flat pools) and note their names:
 | net-lan | LAN | 192.168.10.0/24 | Client VM |
 | net-mgmt | MGMT | 172.16.1.0/24 | NGFW management |
 
-## 3. Deploy NGFW (vNGAF)
+## 3. Deploy NGFW (vNSF)
 
 1. Import the NGFW OVA into HCI.
 2. Attach 4 vNICs: one per zone network (net-wan, net-vuln, net-lan, net-mgmt).
